@@ -6,7 +6,7 @@ const blockHeight = 12;
 // Arrays for each player's questions (populated from localStorage)
 let player1Questions = [];
 let player2Questions = [];
-//yagnesh
+
 // Determine player mode and load questions from localStorage
 const urlParams = new URLSearchParams(window.location.search);
 const mode = urlParams.get('mode');
