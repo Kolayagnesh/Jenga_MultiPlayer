@@ -6,7 +6,7 @@ const blockHeight = 12;
 // Arrays for each player's questions (populated from localStorage)
 let player1Questions = [];
 let player2Questions = [];
-
+//yagnesh
 // Determine player mode and load questions from localStorage
 const urlParams = new URLSearchParams(window.location.search);
 const mode = urlParams.get('mode');
@@ -99,12 +99,14 @@ window.removeBlock = function(block) {
     alert("It's not your turn!");
     return;
   }
-  // Use the correct question set
+  // Show a question from the OPPONENT'S set
   let questions = [];
-  if (mode === 'join') {
-    try { questions = JSON.parse(localStorage.getItem('jenga_questions')) || []; } catch { questions = []; }
+  if (myPlayerIndex === 0) {
+    // Player 1's turn: show a question from player 2's set
+    questions = player2Questions;
   } else {
-    try { questions = JSON.parse(localStorage.getItem('jenga_questions')) || []; } catch { questions = []; }
+    // Player 2's turn: show a question from player 1's set
+    questions = player1Questions;
   }
   let i = Math.floor(Math.random() * questions.length);
   document.getElementById('task').innerText = questions[i] || 'No question set.';
