@@ -74,21 +74,37 @@ const io = new Server(server, {
 
 // --- SERVER-SIDE TURN ENFORCEMENT ---
 const roomTurns = {};
+const roomPlayers = {}; // Track socket IDs for each room
 
 io.on('connection', (socket) => {
   // Join a room
   socket.on('joinRoom', (roomCode) => {
     socket.join(roomCode);
+    // Assign player index
+    if (!roomPlayers[roomCode]) roomPlayers[roomCode] = [];
+    // Prevent duplicate assignment
+    if (!roomPlayers[roomCode].includes(socket.id)) {
+      if (roomPlayers[roomCode].length < 2) {
+        roomPlayers[roomCode].push(socket.id);
+      }
+    }
+    const playerIndex = roomPlayers[roomCode].indexOf(socket.id);
     // If first join, initialize turn
     if (!(roomCode in roomTurns)) roomTurns[roomCode] = 0;
-    // Send current turn to this client
+    // Send current turn and player index to this client
     socket.emit('currentTurn', roomTurns[roomCode]);
+    socket.emit('playerIndex', playerIndex);
   });
 
   // Handle block removal
   socket.on('removeBlock', ({ roomCode, blockNumber }) => {
     // Only allow if it's the correct player's turn
     const currentTurn = roomTurns[roomCode] || 0;
+    const playerIndex = roomPlayers[roomCode] ? roomPlayers[roomCode].indexOf(socket.id) : -1;
+    if (playerIndex !== currentTurn) {
+      socket.emit('notYourTurn');
+      return;
+    }
     // Switch turn
     const nextTurn = 1 - currentTurn;
     roomTurns[roomCode] = nextTurn;
