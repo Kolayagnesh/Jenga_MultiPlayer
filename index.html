@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Jenga Home</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='stylejenga.css'>
+    <style>
+      body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #f8fafc 0%, #e0c3fc 100%); }
+      .home-container { background: rgba(255,255,255,0.9); padding: 40px 32px 32px 32px; border-radius: 18px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); display: flex; flex-direction: column; align-items: center; }
+      h1 { color: #b88a4a; margin-bottom: 16px; }
+      .room-btn { margin: 12px 0; padding: 12px 32px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #f3e2c7; background: #fffbe7; color: #b88a4a; font-weight: bold; cursor: pointer; transition: background 0.2s, color 0.2s; }
+      .room-btn:hover { background: #ffe9b3; color: #7a4a0c; }
+      .input-group { margin: 18px 0; display: flex; flex-direction: column; align-items: center; }
+      .input-group input { padding: 8px 16px; border-radius: 6px; border: 1px solid #f3e2c7; font-size: 1rem; margin-top: 6px; }
+      .label { color: #7a4a0c; font-weight: 500; }
+      .or { margin: 18px 0; color: #b88a4a; font-weight: bold; }
+    </style>
+    <!-- Firebase App (modular SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+    <script>
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyBYHsdWatFS29RzvW9sxWQc_ts9J8B4bMQ",
+        authDomain: "jenga-56225.firebaseapp.com",
+        projectId: "jenga-56225",
+        storageBucket: "jenga-56225.firebasestorage.app",
+        messagingSenderId: "522828022422",
+        appId: "1:522828022422:web:88e72b55bd909780a6f8b7",
+        measurementId: "G-L48HR2NVCB"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+    </script>
+</head>
+<body>
+  <div class="home-container">
+    <h1>Welcome to Jenga!</h1>
+    <div id="google-signin-container" style="margin-bottom:24px;">
+      <button id="google-signin-btn" class="room-btn" type="button" style="display:flex;align-items:center;gap:10px;justify-content:center;min-width:220px;">
+        <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" style="width:22px;height:22px;vertical-align:middle;"> Sign in with Google
+      </button>
+    </div>
+    <form id="create-room-form" action="questionsetup.html" method="get" style="display:none;">
+      <div class="input-group">
+        <label class="label" for="create-player">Your Name</label>
+        <input type="text" id="create-player" name="create-player" required placeholder="Enter your name">
+      </div>
+      <button class="room-btn" type="submit">Create Room & Set Questions</button>
+    </form>
+    <div class="or" style="display:none;">OR</div>
+    <form id="join-room-form" style="display:none;">
+      <div class="input-group">
+        <label class="label" for="join-player">Your Name</label>
+        <input type="text" id="join-player" name="join-player" required placeholder="Enter your name">
+      </div>
+      <div class="input-group">
+        <label class="label" for="room-code">Room Code</label>
+        <input type="text" id="room-code" name="room-code" required placeholder="Enter room code">
+      </div>
+      <button class="room-btn" type="submit">Join Room</button>
+    </form>
+    <div id="how-it-works" style="display:none;margin-top:24px; color:#7a4a0c; font-size:1.05rem; background:#fffbe7; border-radius:8px; padding:12px 18px; max-width:350px;">
+      <b>How it works:</b><br>
+      <ul style="margin:8px 0 0 18px;">
+        <li><b>Create Room:</b> Enter your name, set your 15 questions, and get a room code to share.</li>
+        <li><b>Join Room:</b> Enter your name and the room code you received.</li>
+        <li>When your opponent picks a block, a random question from your set will be shown to them.</li>
+        <li>Keep track of points for each answered question or block removed!</li>
+      </ul>
+    </div>
+  </div>
+  <footer style="width:100%;text-align:center;margin-top:32px;color:#b88a4a;font-size:1rem;opacity:0.85;letter-spacing:0.02em;">
+    Contact: <a href="mailto:yagneshkola@gmail.com" style="color:#b88a4a;text-decoration:underline;">yagneshkola@gmail.com</a>
+  </footer>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script>
+    // Google Sign-In logic
+    const googleBtn = document.getElementById('google-signin-btn');
+    const createRoomForm = document.getElementById('create-room-form');
+    const joinRoomForm = document.getElementById('join-room-form');
+    const orDiv = document.querySelector('.or');
+    const howItWorks = document.getElementById('how-it-works');
+
+    // --- FIREBASE GOOGLE SIGN-IN LOGIC ---
+    function showRoomForms() {
+      createRoomForm.style.display = '';
+      joinRoomForm.style.display = '';
+      orDiv.style.display = '';
+      howItWorks.style.display = '';
+      document.getElementById('google-signin-container').style.display = 'none';
+    }
+
+    function hideRoomForms() {
+      createRoomForm.style.display = 'none';
+      joinRoomForm.style.display = 'none';
+      orDiv.style.display = 'none';
+      howItWorks.style.display = 'none';
+      document.getElementById('google-signin-container').style.display = '';
+    }
+
+    // Check login status on load (Firebase)
+    auth.onAuthStateChanged(function(user) {
+      if (user && user.email) {
+        localStorage.setItem('jenga_user_email', user.email);
+        showRoomForms();
+      } else {
+        localStorage.removeItem('jenga_user_email');
+        hideRoomForms();
+      }
+    });
+
+    googleBtn.onclick = function() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(function(error) {
+        alert('Google sign-in failed: ' + error.message);
+      });
+    };
+
+    // Prevent room actions if not logged in
+    function isLoggedIn() {
+      return !!localStorage.getItem('jenga_user_email');
+    }
+
+    document.getElementById('create-room-form').addEventListener('submit', function(e) {
+      if (!isLoggedIn()) {
+        alert('Please sign up or log in with your email before creating a room.');
+        e.preventDefault();
+        document.getElementById('signup-form').style.display = '';
+        return false;
+      }
+    });
+
+    document.getElementById('join-room-form').addEventListener('submit', function(e) {
+      if (!isLoggedIn()) {
+        alert('Please sign up or log in with your email before joining a room.');
+        e.preventDefault();
+        document.getElementById('signup-form').style.display = '';
+        return false;
+      }
+    });
+
+    document.getElementById('join-room-form').onsubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('join-player').value.trim();
+      const code = document.getElementById('room-code').value.trim();
+      if(name && code) {
+        // Save join info to localStorage for use in game
+        localStorage.setItem('jenga_join_player', name);
+        localStorage.setItem('jenga_join_room', code);
+        // Redirect to question setup page for joiner to set their questions
+        window.location.href = `questionsetup.html?mode=join&player=${encodeURIComponent(name)}&room=${encodeURIComponent(code)}`;
+      }
+    };
+  </script>
+</body>
+</html>

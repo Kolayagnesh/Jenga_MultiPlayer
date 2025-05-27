@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Set Your Jenga Questions</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='stylejenga.css'>
+    <style>
+      body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #f8fafc 0%, #e0c3fc 100%); }
+      .setup-container { background: rgba(255,255,255,0.95); padding: 36px 28px 28px 28px; border-radius: 18px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); display: flex; flex-direction: column; align-items: center; }
+      h2 { color: #b88a4a; margin-bottom: 12px; }
+      .input-group { margin: 12px 0; display: flex; flex-direction: column; align-items: flex-start; }
+      .input-group label { color: #7a4a0c; font-weight: 500; margin-bottom: 4px; }
+      .input-group input, .input-group textarea { padding: 8px 12px; border-radius: 6px; border: 1px solid #f3e2c7; font-size: 1rem; margin-bottom: 8px; width: 320px; }
+      .question-list { margin-top: 10px; }
+      .question-list input { width: 100%; margin-bottom: 6px; }
+      .submit-btn { margin-top: 18px; padding: 12px 32px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #f3e2c7; background: #fffbe7; color: #b88a4a; font-weight: bold; cursor: pointer; transition: background 0.2s, color 0.2s; }
+      .submit-btn:hover { background: #ffe9b3; color: #7a4a0c; }
+      footer { width: 100%; text-align: center; margin-top: 32px; color: #b88a4a; font-size: 1rem; opacity: 0.85; letter-spacing: 0.02em; }
+      footer a { color: #b88a4a; text-decoration: underline; }
+    </style>
+</head>
+<body>
+  <div class="setup-container">
+    <h2>Enter Your Name & Top 10 Jenga Questions</h2>
+    <form id="question-setup-form">
+      <div class="input-group">
+        <label for="player-name">Your Name</label>
+        <input type="text" id="player-name" name="player-name" required placeholder="Enter your name">
+      </div>
+      <div class="question-list" id="question-list">
+        <!-- 10 question inputs will be generated here -->
+      </div>
+      <button class="submit-btn" type="submit">Save & Continue</button>
+    </form>
+    <div id="room-code-section" style="display:none; margin-top:20px; text-align:center;">
+      <h3 style="color:#b88a4a;">Room Code</h3>
+      <div id="room-code-display" style="font-size:1.5rem; font-weight:bold; letter-spacing:0.15em; margin-bottom:10px;color: black;"></div>
+      <div>
+        <span style="color:#7a4a0c;">Share this code with your opponent:</span>
+        <br>
+        <a id="join-link" href="#" style="color:#4b2e05; text-decoration:underline;">Join Room Link</a>
+      </div>
+    </div>
+    <footer>
+      Contact: <a href="mailto:yagneshkola@gmail.com">yagneshkola@gmail.com</a>
+    </footer>
+  </div>
+  <script>
+    // Generate 10 question inputs
+    const questionList = document.getElementById('question-list');
+    for(let i=1; i<=10; i++) {
+      const group = document.createElement('div');
+      group.className = 'input-group';
+      const label = document.createElement('label');
+      label.textContent = `Question ${i}`;
+      label.setAttribute('for', `q${i}`);
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.id = `q${i}`;
+      input.name = `q${i}`;
+      input.required = true;
+      input.placeholder = `Enter question ${i}`;
+      group.appendChild(label);
+      group.appendChild(input);
+      questionList.appendChild(group);
+    }
+    document.getElementById('question-setup-form').onsubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('player-name').value.trim();
+      const questions = [];
+      for(let i=1; i<=10; i++) {
+        questions.push(document.getElementById(`q${i}`).value.trim());
+      }
+      // Generate a random room code (6 uppercase letters/digits)
+      const roomCode = Math.random().toString(36).substring(2,8).toUpperCase();
+      // Save to localStorage (or send to server if multiplayer implemented)
+      localStorage.setItem('jenga_player_name', name);
+      localStorage.setItem('jenga_questions', JSON.stringify(questions));
+      localStorage.setItem('jenga_room_code', roomCode);
+      // Show room code and join link
+      document.getElementById('room-code-display').textContent = roomCode;
+      const joinUrl = window.location.origin + '/indexjenga.html?mode=join&room=' + encodeURIComponent(roomCode);
+      const joinLink = document.getElementById('join-link');
+      joinLink.href = joinUrl;
+      joinLink.textContent = joinUrl;
+      document.getElementById('room-code-section').style.display = '';
+      // Optionally, disable the form after submission
+      document.getElementById('question-setup-form').style.display = 'none';
+    };
+  </script>
+</body>
+</html>
