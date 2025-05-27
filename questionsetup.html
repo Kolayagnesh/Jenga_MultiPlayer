@@ -66,19 +66,54 @@
       group.appendChild(input);
       questionList.appendChild(group);
     }
-    document.getElementById('question-setup-form').onsubmit = function(e) {
+    document.getElementById('question-setup-form').onsubmit = async function(e) {
       e.preventDefault();
       const name = document.getElementById('player-name').value.trim();
       const questions = [];
       for(let i=1; i<=10; i++) {
         questions.push(document.getElementById(`q${i}`).value.trim());
       }
-      // Generate a random room code (6 uppercase letters/digits)
-      const roomCode = Math.random().toString(36).substring(2,8).toUpperCase();
-      // Save to localStorage (or send to server if multiplayer implemented)
-      localStorage.setItem('jenga_player_name', name);
-      localStorage.setItem('jenga_questions', JSON.stringify(questions));
-      localStorage.setItem('jenga_room_code', roomCode);
+      // Check if joining or creating
+      const urlParams = new URLSearchParams(window.location.search);
+      const mode = urlParams.get('mode');
+      let roomCode;
+      if (mode === 'join') {
+        // Use room code from URL
+        roomCode = urlParams.get('room') || '';
+        // Save to localStorage
+        localStorage.setItem('jenga_player_name', name);
+        localStorage.setItem('jenga_questions', JSON.stringify(questions));
+        localStorage.setItem('jenga_room_code', roomCode);
+        // Call backend to join room
+        try {
+          await fetch('/join-room', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ roomCode, playerName: name, questions })
+          });
+        } catch (err) {
+          alert('Failed to join room.');
+          return;
+        }
+      } else {
+        // Generate a random room code (6 uppercase letters/digits)
+        roomCode = Math.random().toString(36).substring(2,8).toUpperCase();
+        // Save to localStorage
+        localStorage.setItem('jenga_player_name', name);
+        localStorage.setItem('jenga_questions', JSON.stringify(questions));
+        localStorage.setItem('jenga_room_code', roomCode);
+        // Call backend to create room
+        try {
+          await fetch('/create-room', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playerName: name, questions })
+          });
+        } catch (err) {
+          alert('Failed to create room.');
+          return;
+        }
+      }
       // Show room code and join link
       document.getElementById('room-code-display').textContent = roomCode;
       const joinUrl = window.location.origin + '/indexjenga.html?mode=join&room=' + encodeURIComponent(roomCode);
