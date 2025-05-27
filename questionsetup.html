@@ -102,6 +102,8 @@
         localStorage.setItem('jenga_player_name', name);
         localStorage.setItem('jenga_questions', JSON.stringify(questions));
         localStorage.setItem('jenga_room_code', roomCode);
+        // Save questions as opponent's questions for the joiner
+        localStorage.setItem('jenga_opponent_questions', JSON.stringify(questions));
         // Call backend to create room
         try {
           await fetch('/create-room', {
