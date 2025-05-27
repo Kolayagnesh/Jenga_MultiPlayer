@@ -183,8 +183,8 @@
         const text = chatInput.value.trim();
         if (text && socket && roomCode) {
           socket.emit('chatMessage', { roomCode, sender: playerDisplayName, text });
-          // Only append locally after server confirms delivery
-          // appendChatMessage(`<b>${playerDisplayName}:</b> ${text}`, true);
+          // Append locally for sender
+          appendChatMessage(`<b>${playerDisplayName}:</b> ${text}`, true);
           chatInput.value = '';
         }
       };
