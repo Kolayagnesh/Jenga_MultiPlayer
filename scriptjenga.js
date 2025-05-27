@@ -75,9 +75,18 @@ function createTower() {
   }
 }
 
-let myPlayerIndex = 0; // 0 for player1, 1 for player2
-if (mode === 'join') myPlayerIndex = 1;
+let myPlayerIndex = 0; // Will be set by server
 let turn = 0; // 0: player1, 1: player2
+
+// Listen for player index assignment from server
+socket.on('playerIndex', (index) => {
+  myPlayerIndex = index;
+});
+
+// Listen for 'notYourTurn' from server
+socket.on('notYourTurn', () => {
+  alert("It's not your turn!");
+});
 
 function updateTurnDisplay() {
   document.getElementById('players-info').innerHTML =
