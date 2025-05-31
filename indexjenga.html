@@ -23,31 +23,45 @@
     <audio id="bg-music" loop>
         <source src="short-10-228139.mp3" type="audio">
     </audio>
-    <div id="jenga-tower"></div>
+    <div id="dynamic-question-container" style="margin: 20px 0; text-align: center;">
+      <input id="dynamic-question-input" type="text" placeholder="Add a new question..." style="padding:8px 12px; border-radius:6px; border:1px solid #f3e2c7; width: 60%; max-width: 320px; font-size:1rem;">
+      <button id="add-question-btn" style="margin-left:8px; padding:8px 18px; border-radius:6px; border:1px solid #b88a4a; background:#fffbe7; color:#b88a4a; font-weight:bold; cursor:pointer;">Add</button>
+    </div>
+    <div id="jenga-tower" style="position:relative;width:320px;height:500px;margin:32px auto 0 auto;background:rgba(255,255,255,0.92);border-radius:12px;box-shadow:0 8px 32px 0 rgba(31,38,135,0.10);border:2px solid #b88a4a;">
+      <!-- 15 rows, 3 blocks per row, 45 blocks total -->
+      <!-- Each block is absolutely positioned for a classic Jenga look -->
+      <script>
+        // Dynamically render 45 blocks in 15 rows x 3 columns
+        const towerDiv = document.currentScript.parentElement;
+        const blockWidth = 80, blockHeight = 22, gap = 2;
+        let blockNumber = 1;
+        for (let i = 0; i < 15; i++) {
+          const isEvenRow = i % 2 === 0;
+          for (let j = 0; j < 3; j++) {
+            if (blockNumber > 45) break;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'block-wrapper';
+            let left = j * (blockWidth + gap);
+            if (!isEvenRow) left += blockWidth / 2;
+            wrapper.style.left = left + 'px';
+            wrapper.style.top = (i * (blockHeight + gap)) + 'px';
+            wrapper.style.width = blockWidth + 'px';
+            wrapper.style.height = blockHeight + 'px';
+            const block = document.createElement('div');
+            block.className = 'block';
+            block.textContent = blockNumber;
+            block.dataset.number = blockNumber;
+            block.style.width = blockWidth + 'px';
+            block.style.height = blockHeight + 'px';
+            wrapper.appendChild(block);
+            towerDiv.appendChild(wrapper);
+            blockNumber++;
+          }
+        }
+      </script>
+    </div>
     <div id="players-info" style="margin:18px 0 0 0; display:flex; justify-content:center; gap:32px; font-size:1.1rem; color:#7a4a0c; font-weight:500;"></div>
     <p id="task">Start The Game!<br>Pick a tile</p>
-
-    <div id="chat-container" style="position:fixed;top:0;left:0;width:25vw;min-width:220px;height:100vh;z-index:1000;background:rgba(255,255,255,0.65);border-radius:0 18px 18px 0;box-shadow:2px 0 12px rgba(0,0,0,0.10);padding:0 0 0 0;display:flex;flex-direction:column;backdrop-filter:blur(2px);">
-      <div id="chat-header" style="font-weight:bold;color:#b88a4a;font-size:1.2rem;margin:0;padding:18px 0 8px 0;text-align:center;border-bottom:1px solid #f3e2c7;">Chat</div>
-      <div id="chat-messages" style="flex:1 1 auto;max-height:calc(100vh - 120px);overflow-y:auto;font-size:1rem;color:#4b2e05;margin:0 0 6px 0;padding:12px 12px 0 12px;"></div>
-      <div style="display:flex;gap:4px;align-items:center;padding:8px 12px 16px 12px;">
-        <input id="chat-input" type="text" maxlength="120" placeholder="Type a message..." style="flex:1 1 auto;padding:8px 10px;border-radius:6px;border:1px solid #f3e2c7;font-size:1rem;outline:none;">
-        <button id="chat-send" style="background:#b88a4a;color:white;border:none;border-radius:6px;padding:8px 12px;font-size:1.1rem;cursor:pointer;">&#10148;</button>
-        <button id="emoji-btn" title="Emoji" style="background:#fffbe7;border:1px solid #f3e2c7;border-radius:6px;padding:8px 10px;font-size:1.2rem;cursor:pointer;">😊</button>
-      </div>
-      <div id="emoji-picker" style="display:none;position:absolute;bottom:70px;left:12px;background:#fffbe7;border:1px solid #f3e2c7;border-radius:8px;padding:6px 8px;z-index:1001;max-width:220px;">
-        <span class="emoji-item" style="cursor:pointer;font-size:1.3rem;">😀</span>
-        <span class="emoji-item" style="cursor:pointer;font-size:1.3rem;">😂</span>
-        <span class="emoji-item" style="cursor:pointer;font-size:1.3rem;">😍</span>
-        <span class="emoji-item" style="cursor:pointer;font-size:1.3rem;">😎</span>
-        <span class="emoji-item" style="cursor:pointer;font-size:1.3rem;">😭</span>
-        <span class="emoji-item" style="cursor:pointer;font-size:1.3rem;">😡</span>
-        <span class="emoji-item" style="cursor:pointer;font-size:1.3rem;">👍</span>
-        <span class="emoji-item" style="cursor:pointer;font-size:1.3rem;">🙏</span>
-        <span class="emoji-item" style="cursor:pointer;font-size:1.3rem;">🎉</span>
-        <span class="emoji-item" style="cursor:pointer;font-size:1.3rem;">🔥</span>
-      </div>
-    </div>
 
     <script src='scriptjenga.js'></script>
     <script>
@@ -59,7 +73,6 @@
         musicBtn.innerHTML = isPlaying ? '&#10073;&#10073;' : '&#127925;';
         musicBtn.title = isPlaying ? 'Pause Music' : 'Play Music';
       }
-      // Ensure button reflects state if user interacts with audio directly
       bgMusic.addEventListener('play', function() {
         isPlaying = true;
         updateMusicBtn();
@@ -76,148 +89,35 @@
         }
       });
       updateMusicBtn();
-
-      // --- Multiplayer/Questions logic (no points) ---
-      // Get params
-      const urlParams = new URLSearchParams(window.location.search);
-      const mode = urlParams.get('mode');
-      let playerName = urlParams.get('player') || localStorage.getItem('jenga_player_name') || '';
-      let roomCode = urlParams.get('room') || localStorage.getItem('jenga_room_code') || '';
-      let joinPlayer = localStorage.getItem('jenga_join_player') || '';
-      let joinRoom = localStorage.getItem('jenga_join_room') || '';
-      // Set up player names
-      let player1 = playerName;
-      let player2 = joinPlayer;
-      if (mode === 'join') {
-        player1 = joinPlayer;
-        player2 = playerName;
-      }
-      // Show player names
-      document.getElementById('players-info').innerHTML =
-        `<span>Player 1: ${player1 || 'Waiting...'}</span> <span>Player 2: ${player2 || 'Waiting...'}</span>`;
-      // Turn logic
-      let turn = 0; // 0: player1, 1: player2
-      function updateTurn() {
-        document.getElementById('players-info').innerHTML =
-          `<span style="${turn===0?'text-decoration:underline;':''}">Player 1: ${player1}</span> <span style="${turn===1?'text-decoration:underline;':''}">Player 2: ${player2}</span>`;
-      }
-
-      // --- SOCKET.IO LOGIC ---
-      const socket = io();
-      // Join the room for real-time updates
-      if (roomCode) {
-        socket.emit('joinRoom', roomCode);
-      }
-
-      // Listen for block removals from other player
-      socket.on('blockRemoved', ({ blockNumber, turn: newTurn }) => {
-        // Find and remove the block visually
-        const block = document.querySelector(`.block[data-number='${blockNumber}']`);
-        if (block) {
-          block.style.transform = 'translateX(100px) rotate(20deg)';
-          block.style.opacity = '0';
-          setTimeout(() => block.remove(), 300);
-        }
-        turn = newTurn;
-        updateTurn();
-      });
-
-      // Listen for turn changes (optional)
-      socket.on('turnChanged', ({ turn: newTurn }) => {
-        turn = newTurn;
-        updateTurn();
-      });
-
-      // Patch removeBlock to use sockets
-      window.removeBlock = function(block) {
-        // Use the correct question set
-        let questions = [];
-        if (mode === 'join') {
-          // Player 2's questions (opponent's set)
-          try { questions = JSON.parse(localStorage.getItem('jenga_questions')) || []; } catch { questions = []; }
-        } else {
-          // Player 1's questions
-          try { questions = JSON.parse(localStorage.getItem('jenga_questions')) || []; } catch { questions = []; }
-        }
-        // Pick a random question
-        let i = Math.floor(Math.random() * questions.length);
-        document.getElementById('task').innerText = questions[i] || 'No question set.';
-        // Animate and remove block locally
-        block.style.transform = 'translateX(100px) rotate(20deg)';
-        block.style.opacity = '0';
-        setTimeout(() => block.remove(), 300);
-        // Emit block removal to server for other player
-        if (roomCode) {
-          const blockNumber = block.dataset.number;
-          socket.emit('removeBlock', { roomCode, blockNumber, turn: 1 - turn });
-        }
-        // Alternate turn
-        turn = 1 - turn;
-        updateTurn();
-      };
-      updateTurn();
-
-      // Display room code if available
-      if(roomCode) {
-        document.getElementById('room-code-bar').textContent = 'Room Code: ' + roomCode;
-      }
-
-      // --- CHAT SOCKET.IO LOGIC ---
-      const chatMessages = document.getElementById('chat-messages');
-      const chatInput = document.getElementById('chat-input');
-      const chatSend = document.getElementById('chat-send');
-      const emojiBtn = document.getElementById('emoji-btn');
-      const emojiPicker = document.getElementById('emoji-picker');
-      const playerDisplayName = playerName || 'Player';
-
-      function appendChatMessage(msg, isSelf) {
-        const div = document.createElement('div');
-        div.style.margin = '2px 0';
-        div.style.textAlign = isSelf ? 'right' : 'left';
-        div.innerHTML = isSelf ? `<span style='color:#b88a4a;'>You:</span> ${msg}` : msg;
-        chatMessages.appendChild(div);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
-
-      chatSend.onclick = function() {
-        const text = chatInput.value.trim();
-        if (text && socket && roomCode) {
-          socket.emit('chatMessage', { roomCode, sender: playerDisplayName, text });
-          // Append locally for sender
-          appendChatMessage(`<b>${playerDisplayName}:</b> ${text}`, true);
-          chatInput.value = '';
-        }
-      };
-      chatInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') chatSend.onclick();
-      });
-
-      // Emoji picker logic
-      emojiBtn.onclick = function() {
-        emojiPicker.style.display = emojiPicker.style.display === 'none' ? 'block' : 'none';
-      };
-      document.querySelectorAll('.emoji-item').forEach(el => {
-        el.onclick = function() {
-          chatInput.value += el.textContent;
-          emojiPicker.style.display = 'none';
-          chatInput.focus();
-        };
-      });
-      document.addEventListener('click', function(e) {
-        if (!emojiPicker.contains(e.target) && e.target !== emojiBtn) {
-          emojiPicker.style.display = 'none';
+      // Ensure the Jenga tower is created on page load (call only once)
+      window.addEventListener('load', function() {
+        if (typeof createTower === 'function') {
+          createTower();
         }
       });
-
-      // Listen for chat messages from server
-      if (socket) {
-        socket.on('chatMessage', ({ sender, text }) => {
-          // Show 'You:' for your own messages, otherwise show sender's name
-          const isSelf = sender === playerDisplayName;
-          const displayMsg = isSelf ? `<span style='color:#b88a4a;'>You:</span> ${text}` : `<b>${sender}:</b> ${text}`;
-          appendChatMessage(displayMsg, isSelf);
+      // Add dynamic question sharing logic
+      const addQuestionBtn = document.getElementById('add-question-btn');
+      const dynamicQuestionInput = document.getElementById('dynamic-question-input');
+      addQuestionBtn.addEventListener('click', function() {
+        const newQuestion = dynamicQuestionInput.value.trim();
+        if (newQuestion.length === 0) return;
+        if (window.roomCode && window.socket) {
+          window.socket.emit('addQuestion', { roomCode: window.roomCode, question: newQuestion });
+        }
+        dynamicQuestionInput.value = '';
+      });
+      // Attach click event to all statically rendered blocks
+      window.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('#jenga-tower .block').forEach(block => {
+          block.addEventListener('click', function() {
+            // Animate removal
+            block.style.transition = 'transform 0.4s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.3s';
+            block.style.transform = 'translateY(-60px) scale(1.2)';
+            block.style.opacity = '0';
+            setTimeout(() => block.remove(), 350);
+          });
         });
-      }
+      });
     </script>
     <footer style="width:100%;text-align:center;margin-top:32px;color:#b88a4a;font-size:1rem;opacity:0.85;letter-spacing:0.02em;">
       Contact: <a href="mailto:yagneshkola@gmail.com" style="color:#b88a4a;text-decoration:underline;">yagneshkola@gmail.com</a>
