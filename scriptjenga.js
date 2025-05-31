@@ -49,30 +49,35 @@ function createTower() {
   // Clear the tower before creating (fixes missing tiles on reload)
   if (tower) tower.innerHTML = '';
   let blockNumber = 1;
-  const blockWidth = 80; // match CSS
-  const blockHeight = 22; // match CSS
-  const gap = 2; // small gap between blocks
+  const blockWidth = 80; // px
+  const blockHeight = 22; // px
+  const gap = 2; // px
+  const rows = 15;
+  const blocksPerRow = 3;
+  // Remove all tower.style assignments (handled by CSS)
   for (let i = 0; i < rows; i++) {
     const isEvenRow = i % 2 === 0;
     for (let j = 0; j < blocksPerRow; j++) {
       if (blockNumber > 45) break;
-      // Create wrapper for spacing and alignment
       const wrapper = document.createElement('div');
       wrapper.className = 'block-wrapper';
-      // Calculate position for wrapper
       let left = j * (blockWidth + gap);
       if (!isEvenRow) left += blockWidth / 2;
+      wrapper.style.position = 'absolute';
       wrapper.style.left = `${left}px`;
       wrapper.style.top = `${i * (blockHeight + gap)}px`;
-      // Create the block
+      wrapper.style.width = `${blockWidth}px`;
+      wrapper.style.height = `${blockHeight}px`;
       const block = document.createElement('div');
       block.className = 'block';
       block.textContent = blockNumber;
       block.dataset.number = blockNumber;
-      blockNumber++;
+      block.style.width = `${blockWidth}px`;
+      block.style.height = `${blockHeight}px`;
       block.addEventListener('click', () => removeBlock(block));
       wrapper.appendChild(block);
       tower.appendChild(wrapper);
+      blockNumber++;
     }
   }
 }
@@ -214,21 +219,14 @@ addQuestionBtn.addEventListener('click', function() {
 // Listen for new questions from server and add to the correct set
 if (socket) {
   socket.on('newQuestion', ({ question, forPlayer }) => {
-    // Add to the set that will be encountered by the OPPONENT
+    // Add to the correct set (opponent's set)
     if (myPlayerIndex === 0 && forPlayer === 1) {
-      // Player 1 added a question, it should be encountered by Player 2
       player2Questions.push(question);
     } else if (myPlayerIndex === 1 && forPlayer === 0) {
-      // Player 2 added a question, it should be encountered by Player 1
       player1Questions.push(question);
     }
   });
 }
 
-// --- Fix: Ensure createTower runs after DOM and script load ---
-window.addEventListener('load', function() {
-  if (typeof createTower === 'function') {
-    createTower();
-    updateTurnDisplay();
-  }
-});
+createTower();
+updateTurnDisplay();
