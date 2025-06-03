@@ -1,126 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>3D Jenga Game</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='stylejenga.css'>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
-    <!-- Add Socket.IO client -->
-    <script src="/socket.io/socket.io.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jenga Online Multiplayer</title>
+    <link rel="stylesheet" href="stylejenga.css">
 </head>
-<header>
-    <h2>Jenga Online  MultiPlayer</h2>
-</header>
 <body>
-    
-    <div id="music-btn-container">
-      <button id="music-btn" title="Play Music">&#127925;</button>
+    <h2 class="jenga-title">Jenga Online Multiplayer</h2>
+    <div id="player-status" class="player-status"></div>
+    <div id="jenga-tower"></div>
+    <p id="Question" class="question-display">Start The Game <br>Pick a Tile</p>
+    <div id="add-question-container" style="position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:110;display:flex;gap:8px;align-items:center;">
+      <input id="extra-question-input" type="text" placeholder="Add a question..." style="padding:7px 14px;border-radius:7px;border:1.5px solid #b88a4a;font-size:1rem;min-width:180px;outline:none;">
+      <button id="add-question-btn" style="padding:7px 16px;background:#b88a4a;color:white;font-weight:600;border:none;border-radius:7px;font-size:1rem;cursor:pointer;">Add</button>
     </div>
-    <audio id="bg-music" loop>
-        <source src="short-10-228139.mp3" type="audio">
-    </audio>
-    <div id="dynamic-question-container" style="margin: 20px 0; text-align: center;">
-      <input id="dynamic-question-input" type="text" placeholder="Add a new question..." style="padding:8px 12px; border-radius:6px; border:1px solid #f3e2c7; width: 60%; max-width: 320px; font-size:1rem;">
-      <button id="add-question-btn" style="margin-left:8px; padding:8px 18px; border-radius:6px; border:1px solid #b88a4a; background:#fffbe7; color:#b88a4a; font-weight:bold; cursor:pointer;">Add</button>
-    </div>
-    <div id="jenga-tower" style="position:relative;width:320px;height:500px;margin:32px auto 0 auto;background:rgba(255,255,255,0.92);border-radius:12px;box-shadow:0 8px 32px 0 rgba(31,38,135,0.10);border:2px solid #b88a4a;">
-      <!-- 15 rows, 3 blocks per row, 45 blocks total -->
-      <!-- Each block is absolutely positioned for a classic Jenga look -->
-      <script>
-        // Dynamically render 45 blocks in 15 rows x 3 columns
-        const towerDiv = document.currentScript.parentElement;
-        const blockWidth = 80, blockHeight = 22, gap = 2;
-        let blockNumber = 1;
-        for (let i = 0; i < 15; i++) {
-          const isEvenRow = i % 2 === 0;
-          for (let j = 0; j < 3; j++) {
-            if (blockNumber > 45) break;
-            const wrapper = document.createElement('div');
-            wrapper.className = 'block-wrapper';
-            let left = j * (blockWidth + gap);
-            if (!isEvenRow) left += blockWidth / 2;
-            wrapper.style.left = left + 'px';
-            wrapper.style.top = (i * (blockHeight + gap)) + 'px';
-            wrapper.style.width = blockWidth + 'px';
-            wrapper.style.height = blockHeight + 'px';
-            const block = document.createElement('div');
-            block.className = 'block';
-            block.textContent = blockNumber;
-            block.dataset.number = blockNumber;
-            block.style.width = blockWidth + 'px';
-            block.style.height = blockHeight + 'px';
-            wrapper.appendChild(block);
-            towerDiv.appendChild(wrapper);
-            blockNumber++;
-          }
-        }
-      </script>
-    </div>
-    <div id="players-info" style="margin:18px 0 0 0; display:flex; justify-content:center; gap:32px; font-size:1.1rem; color:#7a4a0c; font-weight:500;"></div>
-    <p id="task">Start The Game!<br>Pick a tile</p>
-
-    <script src='scriptjenga.js'></script>
-    <script>
-      // Music button logic
-      const musicBtn = document.getElementById('music-btn');
-      const bgMusic = document.getElementById('bg-music');
-      let isPlaying = false;
-      function updateMusicBtn() {
-        musicBtn.innerHTML = isPlaying ? '&#10073;&#10073;' : '&#127925;';
-        musicBtn.title = isPlaying ? 'Pause Music' : 'Play Music';
-      }
-      bgMusic.addEventListener('play', function() {
-        isPlaying = true;
-        updateMusicBtn();
-      });
-      bgMusic.addEventListener('pause', function() {
-        isPlaying = false;
-        updateMusicBtn();
-      });
-      musicBtn.addEventListener('click', function() {
-        if (!isPlaying) {
-          bgMusic.play();
-        } else {
-          bgMusic.pause();
-        }
-      });
-      updateMusicBtn();
-      // Ensure the Jenga tower is created on page load (call only once)
-      window.addEventListener('load', function() {
-        if (typeof createTower === 'function') {
-          createTower();
-        }
-      });
-      // Add dynamic question sharing logic
-      const addQuestionBtn = document.getElementById('add-question-btn');
-      const dynamicQuestionInput = document.getElementById('dynamic-question-input');
-      addQuestionBtn.addEventListener('click', function() {
-        const newQuestion = dynamicQuestionInput.value.trim();
-        if (newQuestion.length === 0) return;
-        if (window.roomCode && window.socket) {
-          window.socket.emit('addQuestion', { roomCode: window.roomCode, question: newQuestion });
-        }
-        dynamicQuestionInput.value = '';
-      });
-      // Attach click event to all statically rendered blocks
-      window.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('#jenga-tower .block').forEach(block => {
-          block.addEventListener('click', function() {
-            // Animate removal
-            block.style.transition = 'transform 0.4s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.3s';
-            block.style.transform = 'translateY(-60px) scale(1.2)';
-            block.style.opacity = '0';
-            setTimeout(() => block.remove(), 350);
-          });
-        });
-      });
-    </script>
-    <footer style="width:100%;text-align:center;margin-top:32px;color:#b88a4a;font-size:1rem;opacity:0.85;letter-spacing:0.02em;">
-      Contact: <a href="mailto:yagneshkola@gmail.com" style="color:#b88a4a;text-decoration:underline;">yagneshkola@gmail.com</a>
-    </footer>
-  </body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="scriptjenga.js"></script>
+</body>
 </html>
