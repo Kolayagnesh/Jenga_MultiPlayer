@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jenga Online Multiplayer</title>
     <link rel="stylesheet" href="stylejenga.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
     <div id="loading-auth" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(255,255,255,0.97);z-index:9999;display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:#b88a4a;">
@@ -13,6 +15,18 @@
       </button>
     </div>
     <script>
+    // --- Firebase config ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyBYHsdWatFS29RzvW9sxWQc_ts9J8B4bMQ",
+      authDomain: "jenga-56225.firebaseapp.com",
+      projectId: "jenga-56225",
+      storageBucket: "jenga-56225.firebasestorage.app",
+      messagingSenderId: "522828022422",
+      appId: "1:522828022422:web:88e72b55bd909780a6f8b7",
+      measurementId: "G-L48HR2NVCB"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     // Show only the button until signed in
     function showMainPage() {
       document.getElementById('loading-auth').style.display = 'none';
@@ -23,13 +37,19 @@
       document.getElementById('main-content').style.display = 'none';
     }
     document.getElementById('google-signin-btn').onclick = function() {
-      // Redirect to backend Google OAuth
-      window.location.href = '/auth/google';
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          showMainPage();
+        })
+        .catch((error) => {
+          alert('Google sign-in failed: ' + error.message);
+        });
     };
-    // Check auth status from backend
+    // Check auth status from Firebase
     hideMainPage();
-    fetch('/auth/status').then(res => res.json()).then(data => {
-      if (data.loggedIn) {
+    auth.onAuthStateChanged(function(user) {
+      if (user) {
         showMainPage();
       } else {
         hideMainPage();
