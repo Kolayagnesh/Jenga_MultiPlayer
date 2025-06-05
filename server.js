@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const port = process.env.PORT||3000;
+// Use the port provided by Render or default to 3000
+const port = process.env.PORT || 3000;
 const path = require('path');
 app.use(express.static(path.join(__dirname)));
 // Use a simple in-memory database for demo (replace with MongoDB/Postgres for production)
@@ -97,7 +98,7 @@ io.on('connection', (socket) => {
   });
 
   // Handle block removal
-  socket.on('removeBlock', ({ roomCode, blockNumber }) => {
+  socket.on('removeBlock', ({ roomCode, blockNumber, question }) => {
     // Only allow if it's the correct player's turn
     const currentTurn = roomTurns[roomCode] || 0;
     const playerIndex = roomPlayers[roomCode] ? roomPlayers[roomCode].indexOf(socket.id) : -1;
@@ -108,8 +109,8 @@ io.on('connection', (socket) => {
     // Switch turn
     const nextTurn = 1 - currentTurn;
     roomTurns[roomCode] = nextTurn;
-    // Broadcast to all clients in the room (including sender)
-    io.to(roomCode).emit('blockRemoved', { blockNumber, nextTurn });
+    // Broadcast to all clients in the room (including sender), include question if provided
+    io.to(roomCode).emit('blockRemoved', { blockNumber, nextTurn, question });
   });
 
   // Handle turn change (optional, if you want to broadcast turn info)
@@ -120,6 +121,23 @@ io.on('connection', (socket) => {
   // Handle chat messages
   socket.on('chatMessage', ({ roomCode, sender, text }) => {
     socket.to(roomCode).emit('chatMessage', { sender, text });
+  });
+
+  // Handle dynamic question sharing
+  socket.on('addQuestion', ({ roomCode, question }) => {
+    // Find the room and add the question to both players' sets
+    const room = rooms[roomCode];
+    if (!room) return;
+    // Add to both sets (so both players can encounter it as an opponent's question)
+    if (room.player1 && Array.isArray(room.player1.questions)) {
+      room.player1.questions.push(question);
+    }
+    if (room.player2 && Array.isArray(room.player2.questions)) {
+      room.player2.questions.push(question);
+    }
+    // Broadcast to both players: indicate which set to add to (forPlayer: 0 or 1)
+    io.to(roomCode).emit('newQuestion', { question, forPlayer: 1 }); // for player2's set
+    io.to(roomCode).emit('newQuestion', { question, forPlayer: 0 }); // for player1's set
   });
 });
 
