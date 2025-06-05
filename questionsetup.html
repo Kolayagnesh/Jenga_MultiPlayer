@@ -1,131 +1,128 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Set Your Jenga Questions</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='stylejenga.css'>
-    <style>
-      body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #f8fafc 0%, #e0c3fc 100%); }
-      .setup-container { background: rgba(255,255,255,0.95); padding: 36px 28px 28px 28px; border-radius: 18px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); display: flex; flex-direction: column; align-items: center; }
-      h2 { color: #b88a4a; margin-bottom: 12px; }
-      .input-group { margin: 12px 0; display: flex; flex-direction: column; align-items: flex-start; }
-      .input-group label { color: #7a4a0c; font-weight: 500; margin-bottom: 4px; }
-      .input-group input, .input-group textarea { padding: 8px 12px; border-radius: 6px; border: 1px solid #f3e2c7; font-size: 1rem; margin-bottom: 8px; width: 320px; }
-      .question-list { margin-top: 10px; }
-      .question-list input { width: 100%; margin-bottom: 6px; }
-      .submit-btn { margin-top: 18px; padding: 12px 32px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #f3e2c7; background: #fffbe7; color: #b88a4a; font-weight: bold; cursor: pointer; transition: background 0.2s, color 0.2s; }
-      .submit-btn:hover { background: #ffe9b3; color: #7a4a0c; }
-      footer { width: 100%; text-align: center; margin-top: 32px; color: #b88a4a; font-size: 1rem; opacity: 0.85; letter-spacing: 0.02em; }
-      footer a { color: #b88a4a; text-decoration: underline; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Set Your Jenga Questions</title>
+  <link rel="stylesheet" href="stylejenga.css">
 </head>
 <body>
-  <div class="setup-container">
-    <h2>Enter Your Name & Top 10 Jenga Questions</h2>
-    <form id="question-setup-form">
-      <div class="input-group">
-        <label for="player-name">Your Name</label>
-        <input type="text" id="player-name" name="player-name" required placeholder="Enter your name">
+  <div class="setup-container" style="background:rgba(255,255,255,0.95);padding:36px 28px 28px 28px;border-radius:18px;box-shadow:0 8px 32px 0 rgba(31,38,135,0.15);display:flex;flex-direction:column;align-items:center;max-width:400px;margin:48px auto;">
+    <h2 style="color:#b88a4a;margin-bottom:12px;">Enter Your Jenga Questions</h2>
+    <form id="question-form" style="width:100%;">
+      <div id="questions-list">
+        <input type="text" name="question" class="question-input" placeholder="Enter a question" style="width:100%;margin-bottom:12px;padding:8px 12px;border-radius:6px;border:1px solid #f3e2c7;font-size:1rem;" required>
       </div>
-      <div class="question-list" id="question-list">
-        <!-- 10 question inputs will be generated here -->
+      <div id="question-count-msg" style="text-align:center;color:#2d2d2d;font-size:1rem;margin-bottom:8px;min-height:18px;"></div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:18px;">
+        <button type="button" id="add-question-btn" style="padding:10px 18px;background:#b88a4a;color:white;font-weight:bold;border:none;border-radius:7px;font-size:1rem;cursor:pointer;">Add Another Question</button>
+        <button type="submit" id="start-game-btn" style="padding:10px 18px;background:#4b2e05;color:white;font-weight:bold;border:none;border-radius:7px;font-size:1rem;cursor:pointer;">Start Game</button>
       </div>
-      <button class="submit-btn" type="submit">Save & Continue</button>
     </form>
-    <div id="room-code-section" style="display:none; margin-top:20px; text-align:center;">
-      <h3 style="color:#b88a4a;">Room Code</h3>
-      <div id="room-code-display" style="font-size:1.5rem; font-weight:bold; letter-spacing:0.15em; margin-bottom:10px;color: black;"></div>
-      <div>
-        <span style="color:#7a4a0c;">Share this code with your opponent:</span>
-        <br>
-        <a id="join-link" href="#" style="color:#4b2e05; text-decoration:underline;">Join Room Link</a>
-      </div>
+    <div id="room-info" style="display:block;margin-top:24px;text-align:center;">
+      <div style="font-size:1.1rem;color:#7a4a0c;margin-bottom:6px;">Room Code:</div>
+      <div id="room-code-display" style="font-size:2rem;font-weight:bold;letter-spacing:0.18em;color:#b88a4a;margin-bottom:10px;text-align:center;"></div>
+      <button id="share-room-btn" style="padding:8px 18px;background:#b88a4a;color:white;font-weight:bold;border:none;border-radius:7px;font-size:1rem;cursor:pointer;margin-bottom:8px;">Share Room Link</button>
+      <div id="share-link-info" style="font-size:0.95rem;color:#2d2d2d;margin-top:6px;"></div>
     </div>
-    <footer>
-      Contact: <a href="mailto:yagneshkola@gmail.com">yagneshkola@gmail.com</a>
-    </footer>
   </div>
   <script>
-    // Generate 10 question inputs
-    const questionList = document.getElementById('question-list');
-    for(let i=1; i<=10; i++) {
-      const group = document.createElement('div');
-      group.className = 'input-group';
-      const label = document.createElement('label');
-      label.textContent = `Question ${i}`;
-      label.setAttribute('for', `q${i}`);
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.id = `q${i}`;
-      input.name = `q${i}`;
-      input.required = true;
-      input.placeholder = `Enter question ${i}`;
-      group.appendChild(label);
-      group.appendChild(input);
-      questionList.appendChild(group);
-    }
-    document.getElementById('question-setup-form').onsubmit = async function(e) {
-      e.preventDefault();
-      const name = document.getElementById('player-name').value.trim();
-      const questions = [];
-      for(let i=1; i<=10; i++) {
-        questions.push(document.getElementById(`q${i}`).value.trim());
-      }
-      // Check if joining or creating
-      const urlParams = new URLSearchParams(window.location.search);
-      const mode = urlParams.get('mode');
-      let roomCode;
-      if (mode === 'join') {
-        // Use room code from URL
-        roomCode = urlParams.get('room') || '';
-        // Save to localStorage
-        localStorage.setItem('jenga_player_name', name);
-        localStorage.setItem('jenga_questions', JSON.stringify(questions));
-        localStorage.setItem('jenga_room_code', roomCode);
-        // Call backend to join room
-        try {
-          await fetch('/join-room', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ roomCode, playerName: name, questions })
-          });
-        } catch (err) {
-          alert('Failed to join room.');
-          return;
-        }
+    const questionsList = document.getElementById('questions-list');
+    const addBtn = document.getElementById('add-question-btn');
+    const questionCountMsg = document.getElementById('question-count-msg');
+    function updateQuestionCountMsg() {
+      // Only count non-empty questions
+      const count = Array.from(document.querySelectorAll('.question-input'))
+        .filter(input => input.value.trim() !== '').length;
+      if (count > 1) {
+        questionCountMsg.textContent = `${count} questions added`;
+      } else if (count === 1) {
+        questionCountMsg.textContent = `1 question added`;
       } else {
-        // Generate a random room code (6 uppercase letters/digits)
-        roomCode = Math.random().toString(36).substring(2,8).toUpperCase();
-        // Save to localStorage
-        localStorage.setItem('jenga_player_name', name);
-        localStorage.setItem('jenga_questions', JSON.stringify(questions));
-        localStorage.setItem('jenga_room_code', roomCode);
-        // Save questions as opponent's questions for the joiner
-        localStorage.setItem('jenga_opponent_questions', JSON.stringify(questions));
-        // Call backend to create room
-        try {
-          await fetch('/create-room', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ playerName: name, questions })
-          });
-        } catch (err) {
-          alert('Failed to create room.');
-          return;
-        }
+        questionCountMsg.textContent = '';
       }
-      // Show room code and join link
-      document.getElementById('room-code-display').textContent = roomCode;
-      const joinUrl = window.location.origin + '/indexjenga.html?mode=join&room=' + encodeURIComponent(roomCode);
-      const joinLink = document.getElementById('join-link');
-      joinLink.href = joinUrl;
-      joinLink.textContent = joinUrl;
-      document.getElementById('room-code-section').style.display = '';
-      // Optionally, disable the form after submission
-      document.getElementById('question-setup-form').style.display = 'none';
+    }
+    addBtn.onclick = function() {
+      // Instead of adding a new input, clear the last input's value and focus it
+      const inputs = document.querySelectorAll('.question-input');
+      const lastInput = inputs[inputs.length - 1];
+      lastInput.value = '';
+      lastInput.focus();
+      updateQuestionCountMsg();
     };
+    // Room code generation and sharing
+    function generateRoomCode() {
+      return Math.random().toString(36).substring(2,8).toUpperCase();
+    }
+    // Get player name and (if joining) room code from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const playerName = urlParams.get('name') || '';
+    const joinRoomCode = urlParams.get('code') || '';
+    let roomCode = '';
+    let isJoin = false;
+    if (joinRoomCode) {
+      // Joining an existing room
+      roomCode = joinRoomCode;
+      isJoin = true;
+      document.getElementById('room-code-display').textContent = roomCode;
+    } else {
+      // Creating a new room
+      roomCode = generateRoomCode();
+      document.getElementById('room-code-display').textContent = roomCode;
+    }
+    // Show room info after first question is entered
+    document.getElementById('room-info').style.display = '';
+    // Share button logic
+    document.getElementById('share-room-btn').onclick = function() {
+      const url = window.location.origin + '/index.html?code=' + encodeURIComponent(roomCode);
+      if (navigator.share) {
+        navigator.share({ title: 'Join my Jenga room!', text: 'Join my Jenga game room:', url })
+          .then(() => document.getElementById('share-link-info').textContent = 'Link shared!')
+          .catch(() => document.getElementById('share-link-info').textContent = url);
+      } else {
+        navigator.clipboard.writeText(url);
+        document.getElementById('share-link-info').textContent = 'Link copied: ' + url;
+      }
+    };
+    document.getElementById('question-form').onsubmit = async function(e) {
+      e.preventDefault();
+      const questions = Array.from(document.querySelectorAll('.question-input')).map(input => input.value.trim()).filter(Boolean);
+      if (questions.length === 0) {
+        alert('Please enter at least one question.');
+        return;
+      }
+      // Save questions and room code to localStorage
+      localStorage.setItem('jenga_questions', JSON.stringify(questions));
+      localStorage.setItem('jenga_room_code', roomCode);
+      localStorage.setItem('jenga_player_name', playerName);
+      // Backend: create or join room
+      if (!isJoin) {
+        // Create room
+        await fetch('/create-room', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ playerName, questions })
+        });
+      } else {
+        // Join room
+        await fetch('/join-room', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ roomCode, playerName, questions })
+        });
+      }
+      // Redirect to the game page
+      window.location.href = 'indexjenga.html?code=' + encodeURIComponent(roomCode);
+    };
+    // Ensure room code is always centered and visible
+    document.getElementById('room-info').style.display = 'block';
+    document.getElementById('room-code-display').style.display = 'block';
+    document.getElementById('room-code-display').style.textAlign = 'center';
+    // Show initial count
+    updateQuestionCountMsg();
+    document.querySelectorAll('.question-input').forEach(input => {
+      input.addEventListener('input', updateQuestionCountMsg);
+    });
   </script>
 </body>
 </html>
