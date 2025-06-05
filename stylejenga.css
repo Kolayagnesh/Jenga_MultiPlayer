@@ -1,226 +1,103 @@
-/* Global styles */
 body {
+  min-height: 100vh;
+  min-width: 100vw;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('Jengabg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   margin: 0;
   padding: 0;
-  background: url('https://wallpaperaccess.com/full/8007663.jpg') no-repeat center center fixed;
-  background-size: cover;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  overflow: hidden;
-  color: #fff;
+}
+
+.jenga-title {
+  text-align: center;
+  color: #b88a4a;
+  font-size: 2rem;
+  margin-top: 32px;
+}
+
+#jenga-tower {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
+  margin-top: 32px;
 }
 
-/* Music button styling */
-#music-btn-container {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 10;
+.jenga-row {
+  display: flex;
+  justify-content: center;
+  margin: 2px 0;
 }
 
-#music-btn {
-  background-color: #b88a4a;
-  color: white;
-  border: none;
-  font-size: 1.5rem;
-  padding: 10px 14px;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s, background 0.3s;
-}
-
-#music-btn:hover {
-  background-color: #d9a860;
-  transform: scale(1.1);
-}
-
-/* Room code bar */
-#room-code-bar {
-  background: #3a2c1c;
-  padding: 10px 0;
-  width: 100%;
-  border-top: 2px solid #b88a4a;
-  border-bottom: 2px solid #b88a4a;
-}
-
-/* Players info */
-#players-info {
-  
-  padding: 12px 0;
-  margin-top: 10px;
-  font-size: 1.2rem;
-  color: #ffd699;
-  border-bottom: 1px solid #b88a4a;
-}
-
-/* Task/question display */
-#task {
-  margin-top: 20px;
-  text-align: center;
-  font-size: 1.4rem;
-  color: #ffcc66;
+.jenga-block {
+  width: 70px;
+  height: 22px;
+  margin: 0 2px;
+  background: linear-gradient(120deg, #e2b77a 0%, #c89d5c 40%, #b88a4a 100%);
+  border: 2px solid #a97c3a;
+  border-radius: 7px;
+  box-shadow: 0 2px 8px 0 rgba(80,50,10,0.13), 0 1px 0 #a97c3a inset;
   font-weight: bold;
-  padding: 8px 16px;
-  background: linear-gradient(90deg, #fffbe7 80%, #ffe9b3 100%);
-  box-shadow: 0 2px 12px #b88a4a22, 0 1px 0 #fffbe7 inset;
-  border-radius: 12px;
-  transition: background 0.3s, color 0.3s;
-}
-
-/* Jenga tower container */
-#jenga-tower {
-  position: relative;
-  margin: 40px auto 0 auto;
-  
-  display: block;
-  min-width: 270px; /* 3*80 + 2*2 + 40 offset for odd rows */
-  min-height: 350px; /* 15*22 + 14*2 */
-  width: 282px; /* 3*80 + 2*2 + 40 offset for odd rows */
-  height: 352px; /* 15*22 + 14*2 */
-}
-
-/* Jenga block styles */
-.block-wrapper {
-  position: absolute;
-  margin: 0;
-  padding: 0;
-  /* left/top set by JS */
-}
-
-.block {
-  background: linear-gradient(100deg, #b98a56 0%, #a06a3a 60%, #e2c48d 100%);
-  border-radius: 8px;
-  box-shadow: 0 2px 8px #a06a3a55, 0 1px 0 #fffbe7 inset, 0 0.5px 2px #a97c5040 inset;
-  border: 1.5px solid #8b5c2a;
-  position: relative;
-  overflow: hidden;
-  filter: drop-shadow(0 1px 2px #b88a4a33);
-  animation: blockPopIn 0.7s cubic-bezier(.68,-0.55,.27,1.55);
+  font-size: 1.25rem;
+  color: #4b2e05;
   display: flex;
   align-items: center;
   justify-content: center;
+  user-select: none;
+}
+
+/* Zigzag effect for rows */
+.jenga-row.odd {
+  transform: translateX(-32px);
+}
+.jenga-row.even {
+  transform: translateX(32px);
+}
+
+.player-status {
   text-align: center;
-  /* Add a subtle bevel for realism */
-  box-shadow: 0 2px 8px #b88a4a55, 0 1px 0 #fffbe7 inset, 0 0.5px 2px #a97c5040 inset;
+  font-size: 1.2rem;
+  color: #2d2d2d;
+  margin-bottom: 12px;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+}
+.player-status .active {
+  color: #b88a4a;
+  text-shadow: 0 2px 8px #ffe9b3;
 }
 
-@keyframes blockPopIn {
-  0% { transform: scale(0.7) translateY(30px); opacity: 0; }
-  80% { transform: scale(1.08) translateY(-6px); opacity: 1; }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
-}
-
-.block:active {
-  filter: brightness(0.95) contrast(1.1);
-  box-shadow: 0 2px 8px #b88a4a99, 0 1px 0 #fffbe7 inset;
-}
-
-.block::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: repeating-linear-gradient(120deg, #e2c48d33 0 2px, transparent 2px 8px), repeating-linear-gradient(45deg, #fffbe71a 0 1px, transparent 1px 8px);
-  opacity: 0.18;
+.jenga-block.block-removing {
+  opacity: 0;
+  transform: translateY(40px) scale(0.7) rotate(-8deg);
+  transition: opacity 0.45s cubic-bezier(.4,1.4,.6,1), transform 0.45s cubic-bezier(.4,1.4,.6,1);
   pointer-events: none;
+  filter: blur(1.5px) brightness(0.85);
 }
 
-.block::after {
-  content: '';
-  position: absolute;
-  left: 0; right: 0; top: 0; bottom: 0;
-  background: radial-gradient(circle at 60% 20%, #fffbe72a 0%, transparent 70%);
-  opacity: 0.10;
-  pointer-events: none;
-}
-
-.block:hover {
-  box-shadow: 0 8px 24px #a06a3a55, 0 1px 0 #fffbe7 inset, 0 0.5px 2px #a97c5040 inset;
-  filter: brightness(1.08) saturate(1.1);
-  background: linear-gradient(90deg, #e2c48d 40%, #a06a3a 100%);
-  transform: scale(1.08);
-  z-index: 10;
-}
-
-/* Add a soft glow to the current player's turn */
-#turn-banner[style*='Your Turn!'] {
-  text-shadow: 0 2px 16px #ffe9b3, 0 0 8px #b88a4a;
-  letter-spacing: 0.06em;
-  animation: pulseTurn 1.2s infinite alternate;
-}
-@keyframes pulseTurn {
-  0% { color: #b88a4a; text-shadow: 0 2px 16px #ffe9b3; }
-  100% { color: #ffcc66; text-shadow: 0 2px 32px #fffbe7; }
-}
-
-/* Optional: make removed blocks fade smoothly */
-#jenga-tower div {
-  transition: transform 0.4s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.3s;
-}
-
-/* Responsive for mobile */
-@media (max-width: 600px) {
-  #jenga-tower {
-    transform: scale(0.7);
-    margin-top: 10px;
-    min-width: 0;
-    min-height: 0;
-    width: 200px;
-    height: 250px;
-  }
-  .block {
-    width: 54px;
-    height: 15px;
-    font-size: 0.9rem;
-  }
-}
-
-.home-container {
-  flex: 1 0 auto;
-}
-
-/* Footer styles */
-footer {
-  width: 100%;
-  text-align: center;
+.question-display {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  background: rgba(255,255,255,0.96);
   color: #b88a4a;
   font-size: 1rem;
-  opacity: 0.85;
-  letter-spacing: 0.02em;
-  flex-shrink: 0;
-  margin-top: auto;
-  margin-bottom: 0px;
-  padding: 100px 0;
-  position: relative;
-}
-
-/* Jenga title styling */
-.jenga-title {
-  width: 100%;
+  font-weight: 500;
+  border-radius: 9px;
+  box-shadow: 0 2px 12px #b88a4a22;
+  padding: 10px 18px;
   text-align: center;
-  font-size: 2.2rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-weight: bold;
-  color: #b88a4a;
-  letter-spacing: 0.08em;
-  margin-bottom: 18px;
-  margin-top: 0;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.10);
-}
-
-/* Added for demonstration */
-.added-text-demo {
-  color: #d9534f;
-  font-size: 1.1rem;
-  font-weight: bold;
-  background: #fffbe7;
-  border-radius: 6px;
-  padding: 8px 16px;
-  margin: 18px auto;
-  display: inline-block;
-  box-shadow: 0 2px 8px rgba(139,90,43,0.10);
+  z-index: 100;
+  min-width: 120px;
+  max-width: 80vw;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  pointer-events: none;
+  margin-bottom: 0%;
+  
 }
