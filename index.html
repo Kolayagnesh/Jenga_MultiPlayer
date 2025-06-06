@@ -84,23 +84,19 @@ const joinErrorMsg = document.getElementById('join-error-msg');
 if (joinForm) {
   joinForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-    const code = joinCodeInput.value.trim();
+    let code = joinCodeInput.value.trim();
     if (!code) {
       joinErrorMsg.textContent = 'Please enter a room code.';
       return;
     }
+    code = code.toUpperCase();
+    joinCodeInput.value = code;
     // Check with backend if room code is valid
     try {
       const res = await fetch(`/room/${encodeURIComponent(code)}`);
       if (!res.ok) {
-        // Try uppercasing the code in case user entered lowercase
-        const res2 = await fetch(`/room/${encodeURIComponent(code.toUpperCase())}`);
-        if (!res2.ok) {
-          joinErrorMsg.textContent = 'Invalid or non-existent room code.';
-          return;
-        } else {
-          joinCodeInput.value = code.toUpperCase();
-        }
+        joinErrorMsg.textContent = 'Invalid or non-existent room code.';
+        return;
       }
       // If valid, submit the form
       joinErrorMsg.textContent = '';
