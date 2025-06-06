@@ -52,7 +52,16 @@
       if (user) {
         showMainPage();
       } else {
-        hideMainPage();
+        document.getElementById('loading-auth').style.display = 'flex';
+        document.getElementById('main-content').style.display = 'none';
+        // Show the sign-in button if not already visible
+        document.getElementById('google-signin-btn').style.display = '';
+      }
+    });
+    // Hide the sign-in button after login
+    auth.onIdTokenChanged(function(user) {
+      if (user) {
+        document.getElementById('google-signin-btn').style.display = 'none';
       }
     });
     </script>
