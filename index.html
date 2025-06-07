@@ -89,31 +89,19 @@
 // Room code validation for Join Room
 const joinForm = document.getElementById('join-room');
 const joinCodeInput = document.getElementById('join-code');
-const joinErrorMsg = document.getElementById('join-error-msg');
 if (joinForm) {
-  joinForm.addEventListener('submit', async function(e) {
+  joinForm.addEventListener('submit', function(e) {
     e.preventDefault();
     let code = joinCodeInput.value.trim();
     if (!code) {
-      joinErrorMsg.textContent = 'Please enter a room code.';
+      document.getElementById('join-error-msg').textContent = 'Please enter a room code.';
       return;
     }
     code = code.toUpperCase();
     joinCodeInput.value = code;
-    // Check with backend if room code is valid
-    try {
-      const res = await fetch(`/room/${encodeURIComponent(code)}`);
-      if (!res.ok) {
-        joinErrorMsg.textContent = 'Invalid or non-existent room code.';
-        return;
-      }
-      // If valid, redirect to questionsetup.html with the room code and player name
-      joinErrorMsg.textContent = '';
-      const playerName = document.getElementById('join-name').value.trim();
-      window.location.href = `questionsetup.html?code=${encodeURIComponent(code)}&name=${encodeURIComponent(playerName)}`;
-    } catch (err) {
-      joinErrorMsg.textContent = 'Error checking room code. Please try again.';
-    }
+    const playerName = document.getElementById('join-name').value.trim();
+    // Go directly to questionsetup.html with code and name
+    window.location.href = `questionsetup.html?code=${encodeURIComponent(code)}&name=${encodeURIComponent(playerName)}`;
   });
 }
 </script>
