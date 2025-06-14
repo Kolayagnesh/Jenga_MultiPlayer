@@ -19,6 +19,11 @@
         <button type="submit" id="start-game-btn" style="padding:10px 18px;background:#4b2e05;color:white;font-weight:bold;border:none;border-radius:7px;font-size:1rem;cursor:pointer;">Start Game</button>
       </div>
     </form>
+    <div id="game-link-container" style="display:none;margin-top:32px;text-align:center;">
+      <div style="font-size:1.1rem;color:#7a4a0c;margin-bottom:10px;">Ready to play?</div>
+      <a id="game-room-link" href="#" style="font-size:1.2rem;font-weight:bold;color:#fff;background:#b88a4a;padding:12px 28px;border-radius:8px;text-decoration:none;box-shadow:0 2px 8px rgba(184,138,74,0.12);transition:background 0.2s;">Enter Game Room</a>
+      <div style="margin-top:10px;font-size:0.98rem;color:#2d2d2d;">Share this link with your friends to join the game!</div>
+    </div>
     <div id="room-info" style="display:block;margin-top:24px;text-align:center;">
       <div style="font-size:1.1rem;color:#7a4a0c;margin-bottom:6px;">Room Code:</div>
       <div id="room-code-display" style="font-size:2rem;font-weight:bold;letter-spacing:0.18em;color:#b88a4a;margin-bottom:10px;text-align:center;"></div>
@@ -111,8 +116,15 @@
           body: JSON.stringify({ roomCode, playerName, questions })
         });
       }
-      // Redirect to the game page
-      window.location.href = 'indexjenga.html?code=' + encodeURIComponent(roomCode);
+      // Show the game room link instead of redirecting
+      const gameLink = `https://jenga-multiplayer.onrender.com/indexjenga.html?code=${encodeURIComponent(roomCode)}`;
+      const linkContainer = document.getElementById('game-link-container');
+      const linkElem = document.getElementById('game-room-link');
+      linkElem.href = gameLink;
+      linkElem.textContent = 'Enter Game Room';
+      linkContainer.style.display = 'block';
+      // Optionally, scroll to the link
+      linkContainer.scrollIntoView({ behavior: 'smooth' });
     };
     // Ensure room code is always centered and visible
     document.getElementById('room-info').style.display = 'block';
